@@ -13,6 +13,8 @@ if ! command -v uv >/dev/null 2>&1; then
     exit 1
 fi
 
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 export GFX803_PREFIX="${GFX803_PREFIX:-$HOME/gfx803}"
 VENV="${VENV:-$GFX803_PREFIX/venv}"
 WHEELS="$GFX803_PREFIX/wheels"
@@ -26,6 +28,34 @@ TV_URL="https://github.com/tsl0922/pytorch-gfx803/releases/download/pytorch-1.13
 echo "==> wheels"
 [ -s "$TORCH_WHL" ] || curl -fL -o "$TORCH_WHL" "$TORCH_URL"
 [ -s "$TV_WHL" ]    || curl -fL -o "$TV_WHL" "$TV_URL"
+
+CHECKSUMS="$HERE/checksums.txt"
+verify_wheel() {
+    local file name expected actual
+    file="$1"
+    name="$(basename "$file")"
+    if [ ! -f "$CHECKSUMS" ]; then
+        echo "warning: $CHECKSUMS missing — cannot verify $name" >&2
+        return 0
+    fi
+    expected="$(awk -v n="$name" '$2 == n { print $1 }' "$CHECKSUMS")"
+    if [ -z "$expected" ]; then
+        echo "warning: no checksum pinned for $name" >&2
+        return 0
+    fi
+    actual="$(sha256sum "$file" | awk '{print $1}')"
+    if [ "$actual" != "$expected" ]; then
+        echo "ERROR: checksum mismatch for $name" >&2
+        echo "  expected: $expected" >&2
+        echo "  actual:   $actual" >&2
+        echo "  refusing to install a wheel that does not match scripts/checksums.txt" >&2
+        exit 1
+    fi
+    echo "verified $name"
+}
+
+verify_wheel "$TORCH_WHL"
+verify_wheel "$TV_WHL"
 
 echo "==> venv: $VENV (Python 3.10)"
 uv venv --python 3.10 "$VENV"

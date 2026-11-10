@@ -1,0 +1,5 @@
+# SHA-256 of the third-party gfx803 wheels.
+# Source: https://github.com/tsl0922/pytorch-gfx803/releases/tag/pytorch-1.13.1
+# These are unofficial rebuilds of PyTorch, not AMD/PyTorch artifacts.
+e6b19c8b2172eee7540739c1f3b612dae3b2712ce30755fa047a6831ee7bc253  torch-1.13.1-cp310-cp310-linux_x86_64.whl
+ae4d55a8dcc7fa520688bd1438082dc869d92d43642e9ead6e7b8dac64d1ccbd  torchvision-0.14.1-cp310-cp310-linux_x86_64.whl

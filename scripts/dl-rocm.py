@@ -38,6 +38,32 @@ EXTRAS = [
     "rocm-llvm5.4.3",
 ]
 
+# Headers + clang needed to compile PyTorch from source (see
+# build-torch-from-source.sh). rocm-llvm is the compiler.
+DEV = [
+    "hip-dev5.4.3",
+    "roctracer-dev5.4.3",
+    "rocm-llvm5.4.3",
+    "rocblas-dev5.4.3",
+    "miopen-hip-dev5.4.3",
+    "hipblas-dev5.4.3",
+    "hipfft-dev5.4.3",
+    "hipsparse-dev5.4.3",
+    "hipsolver-dev5.4.3",
+    "rccl-dev5.4.3",
+    "rocfft-dev5.4.3",
+    "rocrand-dev5.4.3",
+    "rocsolver-dev5.4.3",
+    "rocsparse-dev5.4.3",
+    "hipcub-dev5.4.3",
+    "rocprim-dev5.4.3",
+    "rocthrust-dev5.4.3",
+    "rocm-dev5.4.3",
+    "openmp-extras-dev5.4.3",
+    "hsa-rocr-dev5.4.3",
+    "miopengemm-dev5.4.3",
+]
+
 
 def parse_index(path):
     text = gzip.open(path, "rt", errors="replace").read()
@@ -59,6 +85,8 @@ def main():
     ap.add_argument("--prefix", default=os.path.expanduser("~/gfx803/rocm54"))
     ap.add_argument("--extras", action="store_true",
                     help="also fetch hip-dev, roctracer-dev, migraphx, rocm-llvm")
+    ap.add_argument("--dev", action="store_true",
+                    help="also fetch the headers + clang needed to build PyTorch from source")
     ap.add_argument("--list", action="store_true",
                     help="resolve and print the package list, then exit")
     args = ap.parse_args()
@@ -74,7 +102,12 @@ def main():
         urllib.request.urlretrieve(url, index)
 
     db = parse_index(index)
-    wanted = CORE + (EXTRAS if args.extras else [])
+    wanted = list(CORE)
+    if args.extras:
+        wanted += EXTRAS
+    if args.dev:
+        wanted += DEV
+    wanted = list(dict.fromkeys(wanted))
     missing = [p for p in wanted if p not in db]
     if missing:
         sys.exit("not in index: %s" % missing)

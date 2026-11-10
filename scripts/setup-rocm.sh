@@ -5,6 +5,7 @@
 #   export GFX803_PREFIX="$HOME/gfx803"
 #   bash scripts/setup-rocm.sh            # core packages
 #   bash scripts/setup-rocm.sh --extras   # + hip-dev, roctracer, migraphx, rocm-llvm
+#   bash scripts/setup-rocm.sh --dev      # + headers/clang to build PyTorch from source
 #
 # Result:
 #   $GFX803_PREFIX/rocm54/root/opt/rocm   (the runtime)
@@ -12,10 +13,12 @@
 set -euo pipefail
 
 EXTRAS=0
+DEV=0
 for arg in "$@"; do
     case "$arg" in
         --extras) EXTRAS=1 ;;
-        -h|--help) sed -n '2,11p' "$0"; exit 0 ;;
+        --dev) DEV=1 ;;
+        -h|--help) sed -n '2,12p' "$0"; exit 0 ;;
         *) echo "unknown argument: $arg" >&2; exit 2 ;;
     esac
 done
@@ -39,6 +42,9 @@ echo "==> downloading debs"
 DL_ARGS=(--prefix "$PREFIX")
 if [ "$EXTRAS" = 1 ]; then
     DL_ARGS+=(--extras)
+fi
+if [ "$DEV" = 1 ]; then
+    DL_ARGS+=(--dev)
 fi
 python3 "$HERE/dl-rocm.py" "${DL_ARGS[@]}"
 

@@ -35,6 +35,36 @@ Also expected to work on RX 470 / 480 / 580 / 590 — they are the same `gfx803`
 
 ---
 
+## Provenance & trust (read this)
+
+`torch` and `torchvision` are **not** official PyTorch or AMD artifacts. They are community
+rebuilds from [`tsl0922/pytorch-gfx803`](https://github.com/tsl0922/pytorch-gfx803), release
+**`pytorch-1.13.1`** (commit `9640437`), built against ROCm 5.4.3 for gfx803.
+
+| Wheel | SHA-256 |
+|---|---|
+| `torch-1.13.1-cp310-cp310-linux_x86_64.whl` | `e6b19c8b2172eee7540739c1f3b612dae3b2712ce30755fa047a6831ee7bc253` |
+| `torchvision-0.14.1-cp310-cp310-linux_x86_64.whl` | `ae4d55a8dcc7fa520688bd1438082dc869d92d43642e9ead6e7b8dac64d1ccbd` |
+
+`scripts/install-python.sh` verifies these hashes against **`scripts/checksums.txt`** and refuses
+to install a mismatch. The build reports GCC 11.3, HIP 5.4.22804, MIOpen 2.19.0, arch `['gfx803']`.
+
+**Why not an official wheel?** No official PyTorch ROCm wheel contains gfx803 kernels — they
+target gfx900 / gfx906 / gfx908 / gfx90a / gfx1030 — and AMD dropped Polaris after ROCm 6.1.5.
+A community rebuild is the only prebuilt option.
+
+**If you don't want to trust a third-party binary**, build it yourself against the same runtime:
+
+```bash
+bash scripts/setup-rocm.sh --dev
+bash scripts/build-torch-from-source.sh
+```
+
+That compiles PyTorch 1.13.1 + torchvision 0.14.1 (~1–3 h, 30–50 GiB). See
+[docs/BUILD-FROM-SOURCE.md](docs/BUILD-FROM-SOURCE.md).
+
+---
+
 ## Quick start
 
 ```bash
@@ -78,6 +108,8 @@ and ~4 GiB extracted, for ~14 GiB total.
 | `scripts/mpi_cxx_stub.cpp` | Source for the 5-symbol `libmpi_cxx.so.40` shim |
 | `scripts/build_mpi_stub.sh` | Compiles the stub |
 | `scripts/install-python.sh` | Creates the venv and installs the gfx803 wheels + `numpy<2` |
+| `scripts/checksums.txt` | Pinned SHA-256 for the third-party wheels |
+| `scripts/build-torch-from-source.sh` | Trustless alternative: compiles torch + torchvision locally |
 | `scripts/env.sh` | The environment (`ROCM_PATH`, `LD_LIBRARY_PATH`, `VENV`) |
 | `scripts/verify_gfx803.py` | Numerics check against CPU (GEMM, conv2d, LayerNorm) |
 | `scripts/verify_env.sh` | `rocminfo` + the Python check in one shot |
@@ -255,13 +287,16 @@ short version:
 │   ├── mpi_cxx_stub.cpp
 │   ├── build_mpi_stub.sh
 │   ├── install-python.sh
+│   ├── checksums.txt
+│   ├── build-torch-from-source.sh
 │   ├── env.sh
 │   ├── verify_gfx803.py
 │   ├── verify_env.sh
 │   └── clangxx-wrap.sh
 └── docs/
     ├── TROUBLESHOOTING.md
-    └── MIGRAPHX.md
+    ├── MIGRAPHX.md
+    └── BUILD-FROM-SOURCE.md
 ```
 
 ---

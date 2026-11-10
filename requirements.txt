@@ -1,0 +1,8 @@
+# Core Python dependencies.
+#
+# torch 1.13.1 and torchvision 0.14.1 are NOT on PyPI for gfx803.
+# Install the pinned community wheels with scripts/install-python.sh.
+#
+# This file only pins what matters for ABI compatibility.
+
+numpy<2

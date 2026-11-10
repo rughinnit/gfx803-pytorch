@@ -1,0 +1,20 @@
+# install artifacts (everything the scripts create)
+gfx803/
+rocm54/
+debs/
+wheels/
+venv/
+sysroot/
+Packages.gz
+*.deb
+*.whl
+
+# python
+__pycache__/
+*.py[cod]
+.venv/
+
+# editors / OS
+.idea/
+.vscode/
+.DS_Store
